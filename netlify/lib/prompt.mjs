@@ -1,5 +1,7 @@
-// The AI instructions, word for word from the build brief. They go in as the
-// system prompt; the person's answers go in as the user message.
+// The AI instructions, word for word from the build brief, and the answers
+// laid out for them. The site does not call an AI at the moment: the owner
+// uses these when preparing ideas by hand (system prompt, then answersText as
+// the user message), and answersText is what the owner's notification shows.
 
 import { questions } from "../../public/questions.js";
 

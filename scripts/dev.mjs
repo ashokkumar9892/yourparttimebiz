@@ -6,11 +6,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
-import ideas from "../netlify/functions/ideas.mjs";
+import submit from "../netlify/functions/submit.mjs";
 import contact from "../netlify/functions/contact.mjs";
 
 const pub = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "public");
-const api = { "/api/ideas": ideas, "/api/contact": contact };
+const api = { "/api/submit": submit, "/api/contact": contact };
 const types = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".svg": "image/svg+xml", ".png": "image/png", ".txt": "text/plain" };
 
 function staticFile(pathname) {

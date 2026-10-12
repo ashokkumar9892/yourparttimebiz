@@ -1,14 +1,16 @@
 # yourparttimebiz.com
 
-A free questionnaire that suggests part-time business ideas. A person enters their name and email, answers 16 questions, and gets 3 to 5 ideas on screen in under a minute. The same ideas are emailed to them, and each submission is copied to the owner. Results end with a "Talk to us" button for people who want setup help.
+A free questionnaire for people who want a part-time business. A person enters their name and email and answers 16 questions. The answers are saved, the owner is told, and the person sees a message that their ideas will come by email. The owner reads the answers, writes 3 to 5 business ideas and emails them.
+
+The site does not call an AI, so a submission costs nothing. The AI instructions from the build brief are kept in `netlify/lib/prompt.mjs` for preparing ideas by hand, and for switching automatic ideas back on later.
 
 ## How it is put together
 
 - **The website** is static pages in `public/`, hosted on Netlify. There is no build step.
 - **The backend** is two Netlify Functions in `netlify/functions/`:
-  - `POST /api/ideas` checks the form, applies the daily limits, sends the answers to Claude with the AI instructions as the system prompt, and streams the reply to the page. When the reply is complete it emails the person and the owner.
-  - `POST /api/contact` is the "Talk to us" form. It emails the owner.
-- **The data** is in the Azure SQL database `ceustampsdb`, in its own tables: `yptb_submissions` (name, email, the 16 answers as `q1`..`q16`, the ideas, whether the copy was emailed) and `yptb_contacts` ("Talk to us" messages). The functions save through the yourparttimebiz section of the shared API at `ceustamps-api.azurewebsites.net`, under `/api/yourparttimebiz/*`; its code lives in the CEU-Website repository (`server/src/yourparttimebiz/`). If the API cannot be reached, the record is kept in Netlify Blobs (`submissions`, `contacts`) instead.
+  - `POST /api/submit` checks the form, applies the daily limits, saves the answers and emails the owner.
+  - `POST /api/contact` is the "Talk to us" form. It saves the message and emails the owner.
+- **The data** is in the Azure SQL database `ceustampsdb`, in its own tables: `yptb_submissions` (name, email, the 16 answers as `q1`..`q16`, and `ideas` and `emailed`, which are empty until the ideas have been written and sent) and `yptb_contacts` ("Talk to us" messages). The functions save through the yourparttimebiz section of the shared API at `ceustamps-api.azurewebsites.net`, under `/api/yourparttimebiz/*`; its code lives in the CEU-Website repository (`server/src/yourparttimebiz/`). If the API cannot be reached, the record is kept in Netlify Blobs (`submissions`, `contacts`) instead.
 - **The daily counts** are in Netlify Blobs (`limits`).
 - **Email** goes through Azure Communication Services, the same way RADS10 sends mail.
 
@@ -17,7 +19,7 @@ A free questionnaire that suggests part-time business ideas. A person enters the
 | To change | Edit |
 | --- | --- |
 | The 16 questions | `public/questions.js` (keep the numbering; the AI instructions refer to it) |
-| The AI instructions | `netlify/lib/prompt.mjs` |
+| The AI instructions (not used by the site at the moment) | `netlify/lib/prompt.mjs` |
 | Company name, state, contact email, "last updated" date | `site` at the top of `public/site.js` |
 | Services menu | `public/talk-to-us.html` |
 | Terms of Use, Privacy Policy | `public/terms.html`, `public/privacy.html` |
@@ -28,12 +30,9 @@ Environment variables on the Netlify site (Site configuration → Environment va
 
 | Setting | Required | Purpose |
 | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | yes | Key for the Claude API. Without it the questionnaire answers "not set up yet". |
 | `YPTB_API_KEY` | yes | The key the shared API expects (`YPTB_KEY` on the `ceustamps-api` Web App). Without it submissions are kept only in Netlify Blobs. |
 | `OWNER_EMAIL` | yes | Comma-separated addresses that receive every submission and "Talk to us" message. |
-| `MAIL_ENDPOINT`, `MAIL_KEY`, `MAIL_FROM` | yes | The Azure Communication Service that sends email, and a sender address verified on it. Without all three nothing is emailed; results still show on the page. |
-| `IDEAS_MODEL` | no | Claude model. Default `claude-opus-5-5`. |
-| `IDEAS_EFFORT` | no | How hard the model thinks: `low` (default), `medium`, `high`. Higher is slower and costs more. |
+| `MAIL_ENDPOINT`, `MAIL_KEY`, `MAIL_FROM` | yes | The Azure Communication Service that sends email, and a sender address verified on it. Without all three nothing is emailed; submissions are still saved. |
 | `LIMIT_PER_EMAIL`, `LIMIT_PER_IP`, `LIMIT_PER_DAY` | no | Daily limits on submissions. Defaults 3, 10 and 300. |
 
 ## Deploy

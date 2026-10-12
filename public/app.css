@@ -94,19 +94,7 @@ fieldset.q { border: 0; padding: 0; margin-left: 0; margin-right: 0; min-width: 
 .msg.bad { background: #fbe9e7; color: var(--bad); }
 .msg.ok { background: #e6f4ec; color: var(--good); }
 
-/* results */
-.working { display: flex; gap: 12px; align-items: center; font-weight: 600; }
-.working i { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--brand); animation: spin 1s linear infinite; flex: none; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .working i { animation: none; } html { scroll-behavior: auto; } }
-.ideas h2 { font-size: 1.3rem; margin-top: 1.4em; color: var(--brand-dark); }
-.ideas h3 { margin-top: 1.4em; color: var(--brand-dark); }
-.ideas h4 { margin-top: 1em; }
-.ideas > :first-child { margin-top: 0; }
-.ideas ul, .ideas ol { padding-left: 1.3em; margin: 0 0 1em; }
-.ideas li { margin-bottom: .4em; }
-.ideas hr { border: 0; border-top: 1px solid var(--line); margin: 1.4em 0; }
-.after { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 /* services and legal pages */
 .services li { margin-bottom: .6em; }

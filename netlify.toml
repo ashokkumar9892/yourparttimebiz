@@ -1,8 +1,8 @@
 [build]
   publish = "public"
 
-# /api/ideas and /api/contact are the functions in netlify/functions; each one
-# names its own path. Settings (API key, mail, owner address) are environment
+# /api/submit and /api/contact are the functions in netlify/functions; each one
+# names its own path. Settings (database key, mail, owner address) are environment
 # variables on the Netlify site, listed in README.md.
 [functions]
   directory = "netlify/functions"
