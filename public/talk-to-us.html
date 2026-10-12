@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Talk to us — Your Part-Time Biz</title>
+  <meta name="description" content="Setup help for your part-time business with no upfront cost: getting legal, looking official, getting found and getting customers.">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div id="header"></div>
+  <main class="wrap">
+    <h1 style="font-size:2rem">Talk to us</h1>
+    <p>Starting a business is easier with someone in your corner. Tell us where you are and what you'd like help with, and we'll reply by email.</p>
+
+    <section class="card services">
+      <h2>Setup help from <span data-fill="company" data-or="us">us</span></h2>
+      <p class="muted">No upfront cost. You pay 5% of your business's revenue, and only until an agreed cap is reached. The details go in a separate written agreement before any work starts.</p>
+      <ul>
+        <li><strong>Getting legal:</strong> business license, choosing a structure (sole proprietor or LLC), getting an EIN, opening a business bank account, and finding out which permits or insurance apply.</li>
+        <li><strong>Looking official:</strong> business name, logo, business cards, and a matching email address.</li>
+        <li><strong>Getting found:</strong> setting up a free Google Business Profile so you show up in local searches and on Maps.</li>
+        <li><strong>Getting customers:</strong> low-cost local advertising like Facebook groups, Nextdoor, flyers, and referral deals. No cold calling.</li>
+        <li><strong>Ongoing Q&amp;A:</strong> practical "how do I do this?" help as questions come up. Legal and tax questions get referred to a lawyer or accountant.</li>
+      </ul>
+    </section>
+
+    <section class="card services">
+      <h2>Partner services</h2>
+      <p class="muted">These are separate businesses. Each is run by its own owner and paid directly to that owner.</p>
+      <ul>
+        <li><strong>Website design and building</strong> by Ashok, under his own agreement and pricing.</li>
+        <li><strong>RADS10 listing</strong> (<a href="https://rads10.com" target="_blank" rel="noopener">rads10.com</a>) if you sell online: reach station and podcast audiences, paying a 5% commission only when a sale happens.</li>
+      </ul>
+    </section>
+
+    <div class="msg" id="msg" role="alert"></div>
+    <form class="card" id="contactForm">
+      <h2>Send us a note</h2>
+      <div class="row">
+        <label>Your name<input name="name" maxlength="120" required autocomplete="name"></label>
+        <label>Email<input name="email" type="email" maxlength="200" required autocomplete="email"></label>
+      </div>
+      <label>Phone <span class="muted" style="font-weight:400">(optional)</span><input name="phone" type="tel" maxlength="40" autocomplete="tel"></label>
+      <label>What would you like help with?<textarea name="message" maxlength="4000" required style="min-height:140px" placeholder="Which idea you're leaning toward, and what's in the way."></textarea></label>
+      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="small muted">We use what you send to reply to you. See the <a href="/privacy">Privacy Policy</a>.</p>
+      <button class="btn">Send message</button>
+    </form>
+  </main>
+  <div id="footer"></div>
+
+  <script type="module">
+    import { $, show, post, draft } from "/site.js";
+
+    const form = $("#contactForm");
+    const saved = draft.load();
+    form.elements.name.value = saved.name || "";
+    form.elements.email.value = saved.email || "";
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = $("button", form);
+      button.disabled = true;
+      try {
+        await post("/api/contact", Object.fromEntries(new FormData(form)));
+        form.hidden = true;
+        show($("#msg"), "Thanks. Your message has been sent and we'll reply by email.", "ok");
+      } catch (err) {
+        show($("#msg"), err.message === "Failed to fetch" ? "We couldn't reach the site. Check your connection and try again." : err.message);
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+[build]
+  publish = "public"
+
+# /api/ideas and /api/contact are the functions in netlify/functions; each one
+# names its own path. Settings (API key, mail, owner address) are environment
+# variables on the Netlify site, listed in README.md.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"

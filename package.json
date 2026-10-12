@@ -1,0 +1,17 @@
+{
+  "name": "yourparttimebiz",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Free questionnaire that suggests part-time business ideas, with setup help for people who want it",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env scripts/dev.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "@netlify/blobs": "^11.1.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
