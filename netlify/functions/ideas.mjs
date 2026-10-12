@@ -71,7 +71,8 @@ export default async (req, context) => {
   if (form.problem) return json(400, { error: form.problem });
   if (!process.env.ANTHROPIC_API_KEY) return json(503, { error: "The idea advisor is not set up yet. Please check back soon." });
 
-  const limited = await takeTurn("ideas", { email: form.email, ip: clientIp(req, context) });
+  const ip = clientIp(req, context);
+  const limited = await takeTurn("ideas", { email: form.email, ip });
   if (limited) return json(429, { error: limited });
 
   const client = new Anthropic();
@@ -102,11 +103,9 @@ export default async (req, context) => {
           send(`\u001eERROR:We couldn't come up with ideas from those answers. Please adjust them and try again.`);
         } else {
           if (ideas !== streamed.trim()) send(`\u001eFINAL:${ideas}`);
-          const [, [emailed]] = await Promise.all([
-            save("submissions", { ...form, ideas }),
-            sendAll(resultEmails({ ...form, ideas })),
-          ]);
+          const [emailed] = await sendAll(resultEmails({ ...form, ideas }));
           if (emailed) send(`\u001eEMAILED:`);
+          await save("submissions", { ...form, ideas, emailed, ip });
         }
       } catch (err) {
         if (err instanceof Anthropic.RateLimitError) console.error("AI rate limit reached");

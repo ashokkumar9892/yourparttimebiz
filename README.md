@@ -8,7 +8,8 @@ A free questionnaire that suggests part-time business ideas. A person enters the
 - **The backend** is two Netlify Functions in `netlify/functions/`:
   - `POST /api/ideas` checks the form, applies the daily limits, sends the answers to Claude with the AI instructions as the system prompt, and streams the reply to the page. When the reply is complete it emails the person and the owner.
   - `POST /api/contact` is the "Talk to us" form. It emails the owner.
-- **Storage** is Netlify Blobs: the daily counts (`limits`), and a copy of every submission (`submissions`) and message (`contacts`) so nothing is lost if an email does not arrive. They can be read in the Netlify dashboard under Blobs.
+- **The data** is in the Azure SQL database `ceustampsdb`, in its own tables: `yptb_submissions` (name, email, the 16 answers as `q1`..`q16`, the ideas, whether the copy was emailed) and `yptb_contacts` ("Talk to us" messages). The functions save through the yourparttimebiz section of the shared API at `ceustamps-api.azurewebsites.net`, under `/api/yourparttimebiz/*`; its code lives in the CEU-Website repository (`server/src/yourparttimebiz/`). If the API cannot be reached, the record is kept in Netlify Blobs (`submissions`, `contacts`) instead.
+- **The daily counts** are in Netlify Blobs (`limits`).
 - **Email** goes through Azure Communication Services, the same way RADS10 sends mail.
 
 ## Where things are
@@ -28,6 +29,7 @@ Environment variables on the Netlify site (Site configuration → Environment va
 | Setting | Required | Purpose |
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | yes | Key for the Claude API. Without it the questionnaire answers "not set up yet". |
+| `YPTB_API_KEY` | yes | The key the shared API expects (`YPTB_KEY` on the `ceustamps-api` Web App). Without it submissions are kept only in Netlify Blobs. |
 | `OWNER_EMAIL` | yes | Comma-separated addresses that receive every submission and "Talk to us" message. |
 | `MAIL_ENDPOINT`, `MAIL_KEY`, `MAIL_FROM` | yes | The Azure Communication Service that sends email, and a sender address verified on it. Without all three nothing is emailed; results still show on the page. |
 | `IDEAS_MODEL` | no | Claude model. Default `claude-opus-5-5`. |

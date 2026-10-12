@@ -1,6 +1,6 @@
-// Small key-value storage on Netlify Blobs, for the daily limits and a copy of
-// each submission. Outside Netlify (npm run dev) there are no blobs, so it
-// falls back to memory that lasts until the process stops.
+// The daily limits, kept in Netlify Blobs, and saving of submissions and
+// messages to the database. Outside Netlify (npm run dev) there are no blobs,
+// so those fall back to memory that lasts until the process stops.
 
 import crypto from "node:crypto";
 import { getStore } from "@netlify/blobs";
@@ -44,6 +44,28 @@ export async function takeTurn(kind, { email, ip }) {
   return null;
 }
 
-/** Keeps a record, so nothing is lost if an email does not arrive. */
-export const save = (name, record) =>
-  write(name, `${new Date().toISOString()}-${crypto.randomUUID().slice(0, 8)}`, record);
+const API = (process.env.YPTB_API_URL || "https://ceustamps-api.azurewebsites.net/api/yourparttimebiz").replace(/\/$/, "");
+
+/**
+ * Saves a record ("submissions" or "contacts") in the Azure SQL database,
+ * through the yourparttimebiz section of the shared API. If the API cannot be
+ * reached, or YPTB_API_KEY is not set, the record is kept in Netlify Blobs
+ * instead so it is not lost.
+ */
+export async function save(name, record) {
+  if (process.env.YPTB_API_KEY) {
+    try {
+      const res = await fetch(`${API}/${name}`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-yptb-key": process.env.YPTB_API_KEY },
+        body: JSON.stringify(record),
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (res.ok) return;
+      console.error(`Database save failed (${res.status}); keeping the record in Blobs.`);
+    } catch (err) {
+      console.error(`Database save failed (${err.message}); keeping the record in Blobs.`);
+    }
+  }
+  await write(name, `${new Date().toISOString()}-${crypto.randomUUID().slice(0, 8)}`, record);
+}

@@ -20,11 +20,12 @@ export default async (req, context) => {
   if (!validEmail(email)) return json(400, { error: "Please enter a valid email address." });
   if (!message) return json(400, { error: "Please tell us what you'd like help with." });
 
-  const limited = await takeTurn("contact", { email, ip: clientIp(req, context) });
+  const ip = clientIp(req, context);
+  const limited = await takeTurn("contact", { email, ip });
   if (limited) return json(429, { error: limited });
 
   await Promise.all([
-    save("contacts", { name, email, phone, message }),
+    save("contacts", { name, email, phone, message, ip }),
     sendAll([
       {
         to: ownerAddresses(),
